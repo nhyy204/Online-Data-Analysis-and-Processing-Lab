@@ -1,0 +1,227 @@
+Bài tập cơ bản (dùng spark-shell)
+1. Tạo một RDD từ một danh sách các số và sử dụng transformation map để tạo một RDD 
+mới chứa bình phương của mỗi số.
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val mapped_number = distnumber.map((x) => x*x)
+
+2. Tạo một RDD từ một danh sách các chuỗi và sử dụng transformation filter để lọc ra những 
+chuỗi có độ dài lớn hơn 5 ký tự.
+val string_list = List("Hello", "World", "22120425")
+val diststring = sc.parallelize(string_list)
+val filtered_string = diststring.filter(x => x.length>5)
+
+3. Tạo hai RDD riêng biệt từ hai danh sách các số và sau đó sử dụng transformation union để 
+gộp chúng thành một RDD duy nhất.
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val number_list2 = List(6,7,8,9,10)
+val distnumber2 = sc.parallelize(number_list2)
+val union_number = distnumber.union(distnumber2)
+
+4. Tạo một RDD từ một danh sách các số và sử dụng action count để đếm tổng số phần tử 
+trong RDD.
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val count_number = distnumber.count()
+
+5. Tạo một RDD từ một danh sách các chuỗi và sử dụng action first để lấy ra chuỗi đầu tiên 
+trong RDD. 
+val string_list = List("Hello", "World", "22120425")
+val diststring = sc.parallelize(string_list)
+val first_string = diststring.first()
+
+6. Tạo một RDD từ một danh sách các số và sử dụng action reduce để tính tổng của tất cả các 
+số trong RDD. 
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val sum_number = distnumber.reduce((a,b) => a+b)
+
+7. Tạo một RDD từ một danh sách các số và sau đó sử dụng action collect để thu thập tất cả 
+các số trong RDD và in ra chúng. 
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+distnumber.collect().foreach(println)
+
+8. Tạo một RDD từ một danh sách các số và sử dụng transformation map để nhân mỗi số với 
+2, sau đó sử dụng action reduce để tính tổng của các số đã được nhân. 
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val mapped_number = distnumber.map((x) => x*2)
+val sum_number = mapped_number.reduce((a,b) => a+b)
+
+9. Tạo một RDD từ một danh sách các chuỗi và sử dụng transformation filter để lọc ra các 
+chuỗi có chứa từ "Spark", sau đó sử dụng action count để đếm số lượng chuỗi thỏa điều kiện. 
+val string_list = List("Hello Spark", "World", "22120425 with Spark", "Spark")
+val diststring = sc.parallelize(string_list)
+val filtered_string = diststring.filter(x => x.contains("Spark"))
+val count_string = filtered_string.count()
+
+10. Tạo một RDD từ một danh sách các số và sử dụng transformation map để tính bình phương 
+của mỗi số, sau đó sử dụng action reduce để tính tổng bình phương của các số. 
+val number_list = List(1,2,3,4,5)
+val distnumber = sc.parallelize(number_list)
+val mapped_number = distnumber.map((x) => x*x)
+val sum_number = mapped_number.reduce((a,b) => a+b)
+
+======================================================================================================
+Bài tập nâng cao 
+1. Tạo một RDD gồm 1 triệu số nguyên. Hãy đếm số lượng partition mặc định được tạo ra. Dùng 
+lệnh nào để thay đổi số lượng partition?
+val big_number_list = sc.parallelize(1 to 1000000)
+big_number_list.getNumPartitions
+Kết quả: res4: Int = 8
+
+Thay đổi số lượng partition: có 3 cách 
+Cách 1: ngay khi tạo RDD
+val big_number_list = sc.parallelize(1 to 1000000, 4) 
+//số lượng partition là 4
+
+Cách 2: dùng repartition
+val repartitioned_number_list = big_number_list.repartition(10) 
+//tăng số lượng có 10 partitions
+val repartitioned_number_list = big_number_list.repartition(4) 
+//giảm số lượng còn 4 partitions
+
+Cách 3: dùng coalesce() (chỉ dùng khi giảm partition)
+val fewpartition = big_number_list.coalesce(1) 
+//giảm số lượng còn 1 partition
+
+2. So sánh hiệu suất xử lý khi thực hiện count() trước và sau khi dùng .cache(). Hãy nêu sự khác 
+biệt? 
+Trước khi dùng .cache(), hiệu suất chậm.
+Sau khi dùng .cache(), count() các lần sau hiệu suất nhanh hơn rõ rệt.
+
+Sự khác biệt: 
+Không dùng .cache(): mỗi lần gọi count() sẽ tính toán lại toàn bộ RDD -> tốn thời gian.
+Có dùng .cache(): RDD được lưu vào bộ nhớ (RAM) sau lần đầu -> các lần sau xử lý nhanh hơn nhiều.
+
+3. Sử dụng glom() để in kích thước của từng partition. Hãy nhận xét kết quả đó?
+val size = big_number_list.glom().map(_.length).collect()
+
+Nhận xét: Kích thước của từng partition là gần như bằng nhau vì khi tạo RDD bằng parallelize, Spark cố gắng phân chia dữ liệu đều giữa các partition nếu có thể.
+
+4. Tạo một RDD gồm các cặp (key, value), trong đó key là một chuỗi, value là số nguyên. Hãy tính 
+tổng giá trị theo từng key. 
+val string_int = sc.parallelize(List(("a", 1), ("b", 2), ("c", 3), ("a", 2), ("b", 3)))
+val sumByKey = string_int.reduceByKey((a, b) => a + b)
+
+5. Với dữ liệu key-value, hãy tính trung bình cộng giá trị cho từng key. 
+val mapped = string_int.mapValues(v => (v, 1))
+val sum_key = mapped.reduceByKey {
+  case ((sum1, count1), (sum2, count2)) => (sum1 + sum2, count1 + count2)
+}
+val avg_key = sum_key.mapValues{case(sum, count) => sum.toDouble / count }
+
+6. Tạo một RDD gồm các từ trong nhiều câu văn. Hãy đếm số lần xuất hiện của mỗi từ.
+val words = Seq("Hello", "Spark", "World", "Spark", "22120425", "hello", "Spark")
+val distwords = sc.parallelize(words)
+val mapped_word = distwords.map(word => (word, 1))
+val counts = mapped_word.reduceByKey((a,b) => a+b)
+
+7. Sử dụng flatMap để biến một RDD chứa các chuỗi thành RDD chứa từng từ riêng lẻ. 
+val sentences = Seq("Hello Spark", "World Spark", "22120425 hello Spark")
+val distsentences = sc.parallelize(sentences)
+val word_list = distsentences.flatMap(sentence => sentence.split(" "))
+
+8. Dùng distinct() để loại bỏ các phần tử trùng nhau trong một RDD. Sau đó kết hợp với map để 
+đếm độ dài mỗi phần tử duy nhất.
+val distinct_word = word_list.distinct()
+val length = distinct_word.map(word => (word, word.length))
+
+9. Tạo một RDD gồm các số từ 1 đến 1000. Lọc ra các số chia hết cho cả 3 và 5, rồi tính tổng các 
+số đó.
+val number_list = sc.parallelize(1 to 1000)
+val distnumber = number_list.filter(n => n%3==0 && n%5==0)
+val sum = distnumber.reduce((a,b) => a+b)
+
+10. Cho một RDD chứa danh sách tên sinh viên. Hãy lọc ra những sinh viên có họ bắt đầu bằng chữ 
+“Nguyễn” và đếm số lượng. 
+val names = Seq("Nguyễn Thị Uyển Nhi", "Nguyễn Văn A", "Trần Văn B", "Ngô Thị C", "Nguyễn Thị D")
+val distname = sc.parallelize(names)
+val filtered_name = distname.filter(name => name.startsWith("Nguyễn"))
+val count_name = filtered_name.count()
+
+11. Hãy giải thích sự khác biệt giữa reduceByKey và groupByKey. Trong trường hợp nào nên dùng 
+reduceByKey? 
+reduceByKey: gộp các giá trị cùng key trước trong mỗi partition (cục bộ) rồi mới shuffle, giúp tiết kiệm băng thông và chạy nhanh hơn. 
+groupByKey: gom tất cả giá trị cùng key lại mà không gộp cục bộ trước, nên tốn băng thông và bộ nhớ hơn. Dùng khi cần xử lý toàn bộ tập giá trị của key.
+
+Nên dùng reduceByKey khi cần tính tổng, đếm, max, min hoặc bất kỳ phép tính tổng hợp nào trên giá trị của key.
+
+12. Giả sử cần tính tổng giá trị các phần tử theo nhóm, nhóm được xác định bởi điều kiện phân 
+loại (ví dụ: chẵn/lẻ). Hãy nêu giải pháp tiếp cận?
+B1: Tạo key-value RDD trong đó key là nhóm ("chẵn" hoặc "lẻ")
+B2: Dùng reduceByKey để tính tổng giá trị theo từng nhóm
+
+======================================================================================================
+Challenge/Mini project
+13. Với một đoạn văn bản dài (có thể copy từ một bài báo), hãy viết một pipeline Spark để: 
+• Chuyển văn bản thành danh sách các từ. 
+• Lọc bỏ stop words (tự định nghĩa danh sách). 
+• Đếm số lần xuất hiện của mỗi từ còn lại. 
+• Sắp xếp giảm dần theo số lần xuất hiện và in ra top 10 từ phổ biến nhất.
+
+val text = """The explosion of interest in artificial intelligence has drawn attention not only to the astonishing capacity of algorithms to mimic humans but to the reality that these algorithms could displace many humans in their jobs. The economic and societal consequences could be nothing short of dramatic.
+
+The route to this economic transformation is through the workplace. A widely circulated Goldman Sachs study anticipates that about two-thirds of current occupations over the next decade could be affected and a quarter to a half of the work people do now could be taken over by an algorithm. Up to 300 million jobs worldwide could be affected. The consulting firm McKinsey released its own study predicting an AI-powered boost of US$4.4 trillion to the global economy every year.
+
+The implications of such gigantic numbers are sobering, but how reliable are these predictions?
+
+I lead a research program called Digital Planet that studies the impact of digital technologies on lives and livelihoods around the world and how this impact changes over time. A look at how previous waves of such digital technologies as personal computers and the internet affected workers offers some insight into AI’s potential impact in the years to come. But if the history of the future of work is any guide, we should be prepared for some surprises.
+"""
+
+val disttext = sc.parallelize(Seq(text)) 
+val words = disttext.flatMap(line => line.split("\\W+"))
+val stopWords = Set("the", "of", "in", "has", "to", "not", "but", "that", "could", "many", "and", "is", "through", "a", "about", "over", "up", "own", "its", "how", "are", "i", "at", "on", "around", "as", "if", "for", "any", "we", "should", "be")
+val filtered_word = words.filter(word => !stopWords.contains(word.toLowerCase) && !word.matches("\\d+"))
+val count_word = filtered_word.map(word => (word.toLowerCase, 1)).reduceByKey((a,b) => a+b)
+val result = count_word.sortBy(_._2, ascending = false).take(10)
+result.foreach { case (word, count) =>
+  println(s"$word: $count")
+}
+
+14. Hãy viết một pipeline Spark để tính: 
+• Tổng giá trị các số chia hết cho 7 từ 1 đến 10 triệu. 
+• So sánh thời gian thực hiện khi chia dữ liệu thành 2, 4, và 8 partition.
+val t0 = System.nanoTime()
+val number_list  = sc.parallelize(1L to 10000000L, 2)
+val distnumber = number_list.filter(n => n%7==0)
+val sum = distnumber.reduce((a,b) => a+b)
+val t1 = System.nanoTime()
+println(s"Partitions = 2: Sum = $sum, Time = ${(t1 - t0) / 1e9}s")
+
+val t0 = System.nanoTime()
+val number_list  = sc.parallelize(1L to 10000000L, 4)
+val distnumber = number_list.filter(n => n%7==0)
+val sum = distnumber.reduce((a,b) => a+b)
+val t1 = System.nanoTime()
+println(s"Partitions = 4: Sum = $sum, Time = ${(t1 - t0) / 1e9}s")
+
+val t0 = System.nanoTime()
+val number_list  = sc.parallelize(1L to 10000000L, 8)
+val distnumber = number_list.filter(n => n%7==0)
+val sum = distnumber.reduce((a,b) => a+b)
+val t1 = System.nanoTime()
+println(s"Partitions = 8: Sum = $sum, Time = ${(t1 - t0) / 1e9}s")
+
+Kết quả: 
+Partitions = 2: Sum = 7142857857142, Time = 2.8651732s
+Partitions = 4: Sum = 7142857857142, Time = 2.4344276s
+Partitions = 8: Sum = 7142857857142, Time = 2.5246783s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
