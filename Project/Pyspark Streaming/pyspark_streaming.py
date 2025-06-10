@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, to_timestamp, concat_ws, date_format, regexp_replace, when, lpad
+from pyspark.sql.functions import col, from_json, to_timestamp, concat_ws, date_format, regexp_replace, when, lpad, split
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from bs4 import BeautifulSoup
 import requests, os
@@ -90,6 +90,9 @@ def transform(data):
             "Date",
             date_format(col("Timestamp"), "yyyy-MM-dd") 
         ).withColumn(
+            "Hour",
+            split(col("Time"), ":").getItem(0).cast("int")
+        ).withColumn(
             "Amount_USD", 
             regexp_replace(col("Amount"), "[$,]", "").cast(DoubleType())
         ).withColumn(
@@ -110,6 +113,7 @@ def transform(data):
             "Year",
             "Month",
             "Day",
+            "Hour",
             "Time",
             "Amount_USD",
             "Amount_VND",
