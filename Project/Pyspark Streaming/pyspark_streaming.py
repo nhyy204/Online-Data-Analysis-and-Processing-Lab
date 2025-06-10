@@ -76,9 +76,11 @@ def get_current_exchange_rate(url):
             exchange_rate = float(cleaned_value) / 1000  
             return exchange_rate
         else:
-            raise Exception(f"Element with id='target-input' not found in {url}")
+            print(f"Element with id='target-input' not found in {url}")
+            return 26000
     except Exception as ex:
-        raise Exception(f"Failed to get current exchange rate from {url}")
+        print(f"Failed to get current exchange rate from {url}")
+        return 26000
 
 def transform(data):
     try:
