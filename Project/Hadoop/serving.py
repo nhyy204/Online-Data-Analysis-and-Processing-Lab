@@ -1,5 +1,5 @@
 import pandas as pd
-import requests, os, json
+import requests, os, time
 from hdfs import InsecureClient
 from io import StringIO
 from datetime import datetime
@@ -101,6 +101,19 @@ def push_data_to_powerBI(data, powerBI_url, batch_size=10):
 
         data = data.fillna('')
         data = data.infer_objects(copy=False)
+
+        correct_names = {
+            "Use Chip": "Use_Chip",
+            "Merchant Name": "Merchant_Name",
+            "Merchant City": "Merchant_City",
+            "Merchant State": "Merchant_State",
+            "Is Fraud?": "Is_Fraud",
+            "Errors?": "Errors"
+        }
+        data.rename(columns=correct_names, inplace=True)
+
+        print("Columns:", data.columns.tolist())
+
         records = data.to_dict(orient='records')
 
         header = {
@@ -118,6 +131,7 @@ def push_data_to_powerBI(data, powerBI_url, batch_size=10):
             if response.status_code != 200:
                 raise Exception(f"Failed to push data to Power BI: {response.text}")
             
+            time.sleep(1)  
             print(f"Pushed batch {i // batch_size + 1} of {len(records) // batch_size + 1} to Power BI. Records: {len(batch)}")
 
     except Exception as ex:
