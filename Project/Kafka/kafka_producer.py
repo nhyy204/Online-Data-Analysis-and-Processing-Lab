@@ -1,5 +1,5 @@
 from kafka import KafkaProducer
-import csv, sys, os, json
+import csv, sys, os, json, time, random
 from dotenv import load_dotenv, find_dotenv
 
 # Load environment variables from a .env file
@@ -39,6 +39,8 @@ def send(producer, topic, data):
             raise
         except Exception as ex:
             raise Exception(f"Failed to send transaction: {ex}")
+        finally:
+            time.sleep(random.uniform(1, 5))
     producer.flush()
 
 def stop_kafka(producer):
