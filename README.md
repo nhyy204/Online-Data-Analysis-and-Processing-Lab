@@ -70,7 +70,6 @@ A simulation of a real-time transaction processing system for a financial compan
 
 ![image](https://github.com/user-attachments/assets/e24362d4-7e69-44c7-9e47-cb8fd2683114)
 
-
 ### 📁 Project Folder Layout
 
 ```
@@ -85,14 +84,16 @@ Project/
 │   └── serving.py
 │   └── last_push_timestamp.txt
 ├── Airflow/                   # Airflow DAG for dashboard refresh
-│   └── update_dashboard_dag.py
+│   └── schedule.py
 └── reset.sh                   # Reset HDFS Checkpoints and Output Folder
 └── README.md                  # Project-specific instructions (this file)
 └── requirements.txt           # Python dependencies for Project
 ```
 
 ### 🛠️ Prerequisites
+
 Before running any components, ensure you have the following installed and configured:
+
 - Java JDK 11: Required by Apache Hadoop HDFS and Apache Spark (batch and streaming).
 
 - Java JDK 17: Recommended for Apache Kafka (broker and client) and Apache Airflow.
@@ -110,10 +111,12 @@ Before running any components, ensure you have the following installed and confi
 - Power BI Desktop / Service: For data visualization and REST API endpoint access.
 
 ### 📦 Python Dependencies
+
 All Python dependencies for the Capstone Project are specified in `Project/requirements.txt`. To install, run
-  ```
-  pip install -r Project/requirements.txt
-  ```
+
+```
+pip install -r Project/requirements.txt
+```
 
 ### 🛠️ Initial Setup: Start Required Services
 
