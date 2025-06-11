@@ -46,12 +46,14 @@ def stop_kafka(producer):
         producer.flush()
         producer.close()
     except Exception as ex:
-        print(f"Failed to stop Kafka producer: {ex}")
+        raise Exception(f"Failed to stop Kafka producer: {ex}")
     finally:
         sys.exit(0)
 
 def main():
     try:
+        print("Starting Kafka Producer...")
+
         producer=create_kafka_producer(KAFKA_BOOTSTRAP_SERVERS)
 
         transactions=read_data_from_csv(DATA_FILE_PATH)
@@ -66,6 +68,7 @@ def main():
     except Exception as ex:
         raise Exception(f"Error: {ex}")
     finally:
+        print("Successfully sent transactions to Kafka topic")
         stop_kafka(producer)
 
 if __name__=="__main__":

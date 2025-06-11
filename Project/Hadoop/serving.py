@@ -112,8 +112,6 @@ def push_data_to_powerBI(data, powerBI_url, batch_size=10):
         }
         data.rename(columns=correct_names, inplace=True)
 
-        print("Columns:", data.columns.tolist())
-
         records = data.to_dict(orient='records')
 
         header = {
@@ -140,11 +138,17 @@ def push_data_to_powerBI(data, powerBI_url, batch_size=10):
     
 def main():
     try:
+        print("Start pushing data to Power BI...")
+        
         last_push_timestamp = load_last_push_timestamp(LAST_PUSH_TIMESTAMP_PATH)
+        print(f"Last push timestamp: {last_push_timestamp}")
+
         lasted_data = load_lastest_data_from_hdfs(HDFS_NAMENODE, HDFS_USER, HDFS_PATH, last_push_timestamp)
+
         if not lasted_data.empty:
             push_data_to_powerBI(lasted_data, POWERBI_URL)
             save_last_push_timestamp(LAST_PUSH_TIMESTAMP_PATH, lasted_data)
+            print("Successfully pushed data and updated timestamp")
         else:
             print("No data to push")
     except Exception as ex:

@@ -157,12 +157,21 @@ def stop_spark_session(spark):
 
 def main():
     try:
+        print("Starting Spark Streaming job...")
+
         spark = create_spark_session('pyspark_streaming')
+
         df = read_from_kafka(spark, KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC)
+
         schema = define_schema()
+
         data = parse_data_from_kafka(df, schema)
+
         data = transform(data)
+
         hdfs_query = streaming(data, HDFS_CHECKPOINT, HDFS_PATH)
+
+        print("Streaming query started. Waiting for termination...")
         hdfs_query.awaitTermination()
     except KeyboardInterrupt:
         print("Stopped by user...")
